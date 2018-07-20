@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.ava</groupId>
+    <artifactId>frame-abnf</artifactId>
+    <version>1.0</version>
+    <dependencies>
+        <dependency>
+            <groupId>com.ava</groupId>
+            <artifactId>frame-core</artifactId>
+            <version>1.0</version>
+        </dependency>
+        <!--json 框架 -->
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>fastjson</artifactId>
+            <version>1.2.7</version>
+        </dependency>
+        <dependency>
+            <groupId>org.antlr</groupId>
+            <artifactId>antlr4</artifactId>
+            <version>4.5.1-1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.antlr</groupId>
+            <artifactId>antlr4-runtime</artifactId>
+            <version>4.5.1-1</version>
+            <scope>runtime</scope>
+        </dependency>
+    </dependencies>
+    <!--maven private treasury-->
+    <repositories>
+        <repository>
+            <id>changhong</id>
+            <name>Local Central Repo</name>
+            <url>http://maven.tinyvoice.net:8003/repository/public/</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+        </repository>
+    </repositories>
+    <distributionManagement>
+        <repository>
+            <id>rcsReleases</id>
+            <name>rcsReleases Repositories</name>
+            <url>http://maven.tinyvoice.net:8003/repository/rcsReleases/</url>
+        </repository>
+    </distributionManagement>
+</project>
