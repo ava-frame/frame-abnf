@@ -5,6 +5,7 @@ import com.ava.frame.abnf.antlr4.AbnfParser;
 import com.ava.frame.abnf.antlr4.AbnfParser.*;
 import com.ava.frame.abnf.domain.Entity;
 import com.ava.frame.abnf.element.Recognition;
+import com.ava.frame.abnf.service.AbsVarRuleService;
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
@@ -35,16 +36,13 @@ public class AbnfFuzzer {
     private transient Random random;
     //    渠道
     private String channel;
-
+    private AbsVarRuleService varRuleService;
 
     /**
      * Map of rule names to their elements.
      */
     private final Map<String, Rule> ruleList = new RuleList();
-    /**
-     * 含逗号的规则名，需要全部匹配，选出最优
-     */
-    private final Map<String, RootRule> roots = new HashMap<>();
+
     /**
      * 近义词 列表
      */
@@ -145,18 +143,6 @@ public class AbnfFuzzer {
                                     }
                                     put(name.toString(),
                                             new Rule(name.toString(), (ElementsContext) elements));
-                                } else if (child.getChildCount() > 3) {
-                                    final ParseTree name = child.getChild(0);
-                                    if (!(name instanceof TerminalNode)) {
-                                        throw new IllegalArgumentException();
-                                    }
-                                    ruleList.remove(name.toString());
-                                    roots.put(name.toString(), new RootRule(name.toString()));
-                                    for (int j = 2; j < child.getChildCount(); j++) {
-                                        if (child.getChild(j) instanceof ElementsContext) {
-                                            roots.get(name.toString()).addRule(child.getChild(j).getText());
-                                        }
-                                    }
                                 }
                             }
                         }
@@ -285,8 +271,6 @@ public class AbnfFuzzer {
             return BUILT_IN_RULES.get(ruleName);
         } else if (ruleList.containsKey(ruleName)) {
             return ruleList.get(ruleName);
-        } else if (roots.containsKey(ruleName)) {
-            return roots.get(ruleName);
         }
 
         throw new IllegalArgumentException("no rule \"" + ruleName + "\"");
@@ -326,12 +310,6 @@ public class AbnfFuzzer {
         if (list == null || list.isEmpty()) return null;
         //return list.get(0);
         Entity entityReturn = list.get(0);
-        for(Entity entity : list){
-            if(entity.getHot()){
-                entityReturn = entity;
-                return entityReturn;
-            }
-        }
         return entityReturn;
     }
 
@@ -350,15 +328,6 @@ public class AbnfFuzzer {
         return varRuleService.matchRegexEntity4AllParam(recognition, labelType);
     }
 
-    /**
-     * 查找到所有实体
-     *
-     * @param words
-     * @return
-     */
-    public List<Entity> findEntity(String words) {
-        return varRuleService.findEntity(this.channel, words);
-    }
 
     //    正则匹配 参数过滤
     private Pattern pattern = Pattern.compile("(?<=\\{\\{)(.+?)(?=\\}\\})");
@@ -435,7 +404,7 @@ public class AbnfFuzzer {
                 }
             }
         }
-        recognition.getEntities().add(entity);
+        recognition.getEntities().get(entity.getMatchName()).add(entity);
         return entity.getMatchName();
     }
 
@@ -478,8 +447,5 @@ public class AbnfFuzzer {
         this.channel = channel;
     }
 
-    public void setVarRuleService(AbsVarRuleService varRuleService) {
-        this.varRuleService = varRuleService;
-    }
 
 }

@@ -5,10 +5,7 @@ import com.ava.frame.abnf.domain.Entity;
 import com.ava.frame.abnf.element.Recognition;
 import org.springframework.util.CollectionUtils;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Created by redred on 2017/7/28.
@@ -28,7 +25,7 @@ public class CommonVarRuleService extends AbsVarRuleService {
 
     @Override
     public List<Entity> match(Recognition recognition, String labelType) {
-        return matchEntity(recognition, labelType);
+        return matchEntity(recognition,retainSet(recognition.lastallParam()), labelType);
     }
 
 
@@ -50,18 +47,15 @@ public class CommonVarRuleService extends AbsVarRuleService {
      * @param label
      * @return 字数最大匹配
      */
-    private List<Entity> matchEntity(Recognition recognition, String label) {
-        Set<String> set = recognition.retainSet();
+    private List<Entity> matchEntity(Recognition recognition,  Set<String> set, String label) {
         List<Entity> list = recognition.getEntitiesTemp();
         if (CollectionUtils.isEmpty(list)) return null;
         List<Entity> result = new ArrayList<>();
 //        最大字数
         String matchMaxParam = null;
-        boolean returnMatchName="film".equals(label);
         for (Entity one : list) {
             if (labelExtends(label, one.getLabel())) continue;
             Entity matchMaxOne = null;
-
             for (String anotherName : one.getFormatNames()) {
                 if (set.contains(anotherName) && (matchMaxParam == null || anotherName.length() >= matchMaxParam.length())) {
                     matchMaxParam = anotherName;
@@ -77,7 +71,24 @@ public class CommonVarRuleService extends AbsVarRuleService {
                 result.add(matchMaxOne);
             }
         }
+        result.sort(new Comparator<Entity>() {
+            @Override
+            public int compare(Entity o1, Entity o2) {
+                return o2.getLevel()-o1.getLevel();
+            }
+        });
         return result;
+    }
+
+
+    public Set<String> retainSet( String lastParam) {
+        Set<String> set = new HashSet<>();
+        for (int i = 0; i < lastParam.length(); i++) {
+            for (int j = i + 1; j < lastParam.length() + 1; j++) {
+                set.add(lastParam.substring(i, j));
+            }
+        }
+        return set;
     }
 
     /**
@@ -88,38 +99,17 @@ public class CommonVarRuleService extends AbsVarRuleService {
      * @return
      */
     public List<Entity> matchRegexEntity4AllParam(Recognition recognition, String label) {
-        Set<String> set = recognition.retainSet4AllParam();
-        List<Entity> list = recognition.getEntitiesTemp();
-        List<Entity> result = new ArrayList<>();
-        if (CollectionUtils.isEmpty(list)) return null;
-        String matchMaxParam = null;
-        boolean returnMatchName="film".equals(label);
-        for (Entity one : list) {
-            if (labelExtends(label, one.getLabel())) continue;
-            Entity matchMaxOne = null;
-//            if (set.contains(one.getFormatName()) && (matchMaxParam == null || one.getFormatName().length() >= matchMaxParam.length())) {
-//                matchMaxParam = one.getFormatName();
-//                matchMaxOne = (Entity) one.clone();
-//            }
-            for (String anotherName : one.getFormatNames()) {
-                if (set.contains(anotherName) && (matchMaxParam == null || anotherName.length() > matchMaxParam.length())) {
-                    matchMaxParam = anotherName;
-                    matchMaxOne = (Entity) one.clone();
-                }
-            }
-            if (matchMaxOne != null) {
-                matchMaxOne.setMatchName(matchMaxParam);
-
-                if (!result.isEmpty() && result.get(0).getMatchName().length() < matchMaxParam.length()) {
-//                    存放的列表的长度小于当前值，重置列表
-                    result.clear();
-                }
-                result.add(matchMaxOne);
+        return matchEntity(recognition,retainSet4LastAllParam(recognition.lastallParam()), label);
+    }
+    public Set<String> retainSet4LastAllParam( String lastParam) {
+        Set<String> set = new HashSet<>();
+        for (int i = 0; i < lastParam.length(); i++) {
+            for (int j = i + 1; j < lastParam.length() + 1; j++) {
+                set.add(lastParam.substring(i, j));
             }
         }
-        return result;
+        return set;
     }
-
     private boolean labelExtends(String label, String one) {
 //        无限制，或者限制正确
         if (label == null || label.equals(one)) return false;

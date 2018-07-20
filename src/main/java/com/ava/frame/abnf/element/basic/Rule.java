@@ -52,15 +52,8 @@ public class Rule extends Element {
 
     @Override
     public boolean match(final AbnfFuzzer f, Recognition recognition) {
-
-        List<Entity> oldEntity=new ArrayList<>();
-        oldEntity.addAll(recognition.getEntities());
-        Map<String, String> oldRule = new HashMap<String, String>();
-        oldRule.putAll(recognition.getRules());
-
         boolean match = true;
         StringBuilder words = new StringBuilder();
-
         for (Element e : elements) {
             ElementNode node = new ElementNode(e, recognition.getIndex());
             match = match && node.match(f, recognition);
@@ -69,18 +62,6 @@ public class Rule extends Element {
         }
 //
         recognition.setLastParamMatch(words.toString());
-//      更新cache
-        List<Entity> newEntity=new ArrayList<>();
-        newEntity.addAll(recognition.getEntities());
-        for (Entity e:oldEntity){
-            newEntity.remove(e);
-        }
-        Map<String, String> newRule = new HashMap<String, String>();
-        newRule.putAll(recognition.getRules());
-        for (String key:oldRule.keySet()){
-            if (newRule.get(key).equals(oldRule.get(key)))newRule.remove(key);
-        }
-
         return match;
     }
 

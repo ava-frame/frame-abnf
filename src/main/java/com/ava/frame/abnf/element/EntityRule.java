@@ -28,9 +28,8 @@ public class EntityRule extends Rule {
 //        不同label可能同名，所以得都返回
         List<Entity> list = f.matchEntity(recognition,label);
         if (list == null||list.isEmpty()) return false;
-        for (Entity en:list){
-            recognition.getEntities().add(en);
-        }
+        String matchName=list.get(0).getMatchName();
+        recognition.putEntity(matchName,list);
         recognition.addIndex(list.get(0).getMatchName().length());
         return true;
     }

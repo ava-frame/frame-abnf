@@ -1,6 +1,5 @@
 package com.ava.frame.abnf.element.basic;
 
-import com.changhong.data.semantic.abnffuzzer.element.Recognition;
 
 import java.util.Random;
 import java.util.Set;
@@ -23,12 +22,7 @@ final class Alpha extends Rule {
         }
     }
 
-    @Override
-    public boolean match(AbnfFuzzer f, Recognition recognition) {
-//        todo
-        return true;
 
-    }
 
     @Override
     public byte[] generate(final AbnfFuzzer f, final Random r,

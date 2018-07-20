@@ -1,6 +1,7 @@
 package com.ava.frame.abnf.element.basic;
 
-import com.changhong.data.semantic.abnffuzzer.element.Recognition;
+
+import com.ava.frame.abnf.element.Recognition;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Random;

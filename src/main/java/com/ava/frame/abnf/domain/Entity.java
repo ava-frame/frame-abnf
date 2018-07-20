@@ -7,18 +7,17 @@ import java.util.List;
  * Created by redred on 2017/9/7.
  * email:zhyx2014@yeah.net
  */
-
-public class Entity  implements Cloneable {
+public class Entity implements Cloneable {
     //    唯一标识==_key
     private String uuid;
     //    实体类型film figure role
     private String label;
+    //    优先级 人物是hot
     private int level;
     //  实体别名
     private List<String> formatNames;
     //    匹配名
     private String matchName;
-
 
     @Override
     public Object clone() {
@@ -30,6 +29,7 @@ public class Entity  implements Cloneable {
         }
         return obj;
     }
+
     @Override
     public String toString() {
         return "Entity{" +
@@ -70,5 +70,13 @@ public class Entity  implements Cloneable {
 
     public void setMatchName(String matchName) {
         this.matchName = matchName;
+    }
+
+    public int getLevel() {
+        return level;
+    }
+
+    public void setLevel(int level) {
+        this.level = level;
     }
 }

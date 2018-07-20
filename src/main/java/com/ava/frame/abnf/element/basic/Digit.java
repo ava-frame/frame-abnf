@@ -1,7 +1,7 @@
 package com.ava.frame.abnf.element.basic;
 
-import com.changhong.data.semantic.abnffuzzer.element.Recognition;
-import com.changhong.data.semantic.core.util.StringUtils;
+import com.ava.frame.abnf.element.Recognition;
+import com.ava.frame.core.utils.StringUtils;
 import org.springframework.util.CollectionUtils;
 
 import java.util.List;
