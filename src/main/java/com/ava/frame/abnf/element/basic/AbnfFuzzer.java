@@ -34,8 +34,6 @@ public class AbnfFuzzer {
     @SuppressWarnings("unused")
     private static final long serialVersionUID = -5734957539715862213L;
     private transient Random random;
-    //    渠道
-    private String channel;
     private AbsVarRuleService varRuleService;
 
     /**
@@ -225,9 +223,7 @@ public class AbnfFuzzer {
      */
     public boolean match(String ruleName, Recognition recognition) {
         ElementNode node = new ElementNode(getRule(ruleName), recognition.getIndex());
-        boolean match = node.match(this, recognition);
-//        if (CollectionUtils.isEmpty(recognition.getRules().values())) return false;
-        return match;
+        return node.match(this, recognition);
     }
 
     /**
@@ -439,13 +435,7 @@ public class AbnfFuzzer {
         ruleList.clear();
     }
 
-    public String getChannel() {
-        return channel;
+    public void setVarRuleService(AbsVarRuleService varRuleService) {
+        this.varRuleService = varRuleService;
     }
-
-    public void setChannel(String channel) {
-        this.channel = channel;
-    }
-
-
 }
