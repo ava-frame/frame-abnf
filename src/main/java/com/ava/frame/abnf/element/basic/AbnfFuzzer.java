@@ -45,6 +45,9 @@ public class AbnfFuzzer {
      * 近义词 列表
      */
     private final Map<String, String> synWordMap = new HashMap<>();
+    public Collection<Rule> getRules(){
+        return ruleList.values();
+    }
 
     /**
      * 添加正则表达规则模板文件
@@ -72,10 +75,7 @@ public class AbnfFuzzer {
      */
     public void addSynWord(final String regex) throws Exception {
         String[] arr = regex.split("[\t\\s]+");
-        if (arr.length < 2) {
-//            log.info("regex:word:" + regex);
-            return;
-        }
+        if (arr.length < 2)return;
         StringBuilder value = new StringBuilder();
         for (int i = 0; i < arr.length; i++) {
             value.append(arr[i]).append("|");
@@ -92,7 +92,9 @@ public class AbnfFuzzer {
     public void addRules(final String rule) throws IOException {
         this.addRules(new StringReader(rule));
     }
-
+    public void delRule(final String ruleName) throws IOException{
+        this.ruleList.remove(ruleName);
+    }
     /**
      * 添加文法规则文档
      *

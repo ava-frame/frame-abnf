@@ -3,6 +3,7 @@ package com.ava.frame.abnf.service;
 
 import com.ava.frame.abnf.domain.Entity;
 import com.ava.frame.abnf.element.Recognition;
+import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 import java.util.*;
@@ -11,6 +12,7 @@ import java.util.*;
  * Created by redred on 2017/7/28.
  * email:zhyx2014@yeah.net
  */
+@Component
 public class CommonVarRuleService extends AbsVarRuleService {
     private String[] set2Arr(Set<String> set) {
         if (CollectionUtils.isEmpty(set)) return new String[0];
@@ -25,7 +27,7 @@ public class CommonVarRuleService extends AbsVarRuleService {
 
     @Override
     public List<Entity> match(Recognition recognition, String labelType) {
-        return matchEntity(recognition,retainSet(recognition.lastallParam()), labelType);
+        return matchEntity(recognition, retainSet(recognition.lastallParam()), labelType);
     }
 
 
@@ -47,7 +49,7 @@ public class CommonVarRuleService extends AbsVarRuleService {
      * @param label
      * @return 字数最大匹配
      */
-    private List<Entity> matchEntity(Recognition recognition,  Set<String> set, String label) {
+    private List<Entity> matchEntity(Recognition recognition, Set<String> set, String label) {
         List<Entity> list = recognition.getEntitiesTemp();
         if (CollectionUtils.isEmpty(list)) return null;
         List<Entity> result = new ArrayList<>();
@@ -74,14 +76,14 @@ public class CommonVarRuleService extends AbsVarRuleService {
         result.sort(new Comparator<Entity>() {
             @Override
             public int compare(Entity o1, Entity o2) {
-                return o2.getLevel()-o1.getLevel();
+                return o2.getLevel() - o1.getLevel();
             }
         });
         return result;
     }
 
 
-    public Set<String> retainSet( String lastParam) {
+    public Set<String> retainSet(String lastParam) {
         Set<String> set = new HashSet<>();
         for (int i = 0; i < lastParam.length(); i++) {
             for (int j = i + 1; j < lastParam.length() + 1; j++) {
@@ -99,9 +101,10 @@ public class CommonVarRuleService extends AbsVarRuleService {
      * @return
      */
     public List<Entity> matchRegexEntity4AllParam(Recognition recognition, String label) {
-        return matchEntity(recognition,retainSet4LastAllParam(recognition.lastallParam()), label);
+        return matchEntity(recognition, retainSet4LastAllParam(recognition.lastallParam()), label);
     }
-    public Set<String> retainSet4LastAllParam( String lastParam) {
+
+    public Set<String> retainSet4LastAllParam(String lastParam) {
         Set<String> set = new HashSet<>();
         for (int i = 0; i < lastParam.length(); i++) {
             for (int j = i + 1; j < lastParam.length() + 1; j++) {
@@ -110,12 +113,12 @@ public class CommonVarRuleService extends AbsVarRuleService {
         }
         return set;
     }
+
     private boolean labelExtends(String label, String one) {
 //        无限制，或者限制正确
         if (label == null || label.equals(one)) return false;
         return true;
     }
-
 
 
 }

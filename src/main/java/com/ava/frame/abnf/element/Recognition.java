@@ -10,6 +10,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.regex.Pattern;
 
 /**
  * Created by ava on 2017/5/24.
@@ -19,7 +20,7 @@ public class Recognition implements Cloneable, Serializable {
     //    用户输入原话
     private transient String param;
     //    最终结果
-    private boolean match;
+    private boolean match=false;
     //    分解词的位置
     private AtomicInteger index = new AtomicInteger(0);
     //    正在匹配的字词
@@ -60,6 +61,11 @@ public class Recognition implements Cloneable, Serializable {
     }
 
 
+    public  boolean onlyUseless(String words) {
+        String pattern = "[哎呀嗯啊吗阿西吧唔拉啦了呗的得地滴噻哇哒嘟咔么哪呐嘎没有吗呢哈丫]{1,}";
+        if (words.replaceAll(pattern,"").length()==0)return true;
+        return false;
+    }
     public String getFirstRule() {
         return firstRule;
     }
