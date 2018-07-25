@@ -4,6 +4,7 @@ import com.ava.frame.abnf.antlr4.AbnfLexer;
 import com.ava.frame.abnf.antlr4.AbnfParser;
 import com.ava.frame.abnf.antlr4.AbnfParser.*;
 import com.ava.frame.abnf.domain.Entity;
+import com.ava.frame.abnf.element.EntityRule;
 import com.ava.frame.abnf.element.Recognition;
 import com.ava.frame.abnf.service.AbsVarRuleService;
 import org.antlr.v4.runtime.ANTLRInputStream;
@@ -45,7 +46,8 @@ public class AbnfFuzzer {
      * 近义词 列表
      */
     private final Map<String, String> synWordMap = new HashMap<>();
-    public Collection<Rule> getRules(){
+
+    public Collection<Rule> getRules() {
         return ruleList.values();
     }
 
@@ -75,7 +77,7 @@ public class AbnfFuzzer {
      */
     public void addSynWord(final String regex) throws Exception {
         String[] arr = regex.split("[\t\\s]+");
-        if (arr.length < 2)return;
+        if (arr.length < 2) return;
         StringBuilder value = new StringBuilder();
         for (int i = 0; i < arr.length; i++) {
             value.append(arr[i]).append("|");
@@ -92,9 +94,11 @@ public class AbnfFuzzer {
     public void addRules(final String rule) throws IOException {
         this.addRules(new StringReader(rule));
     }
-    public void delRule(final String ruleName) throws IOException{
+
+    public void delRule(final String ruleName) throws IOException {
         this.ruleList.remove(ruleName);
     }
+
     /**
      * 添加文法规则文档
      *
@@ -256,6 +260,7 @@ public class AbnfFuzzer {
 
                 }
             });
+    private Map<String, EntityRule> entityRules = new HashMap<>();
 
     /**
      * Get a defined ABNF rule.
@@ -269,6 +274,14 @@ public class AbnfFuzzer {
             return BUILT_IN_RULES.get(ruleName);
         } else if (ruleList.containsKey(ruleName)) {
             return ruleList.get(ruleName);
+        } else if (entityRules.containsKey(ruleName)) {
+            return entityRules.get(ruleName);
+        } else if (ruleName.contains("en_")) {
+            synchronized (this) {
+                if (!entityRules.containsKey(ruleName))
+                    entityRules.put(ruleName, new EntityRule(ruleName.replaceFirst("en_","")));
+            }
+            return entityRules.get(ruleName);
         }
 
         throw new IllegalArgumentException("no rule \"" + ruleName + "\"");
@@ -402,7 +415,7 @@ public class AbnfFuzzer {
                 }
             }
         }
-        recognition.getEntities().get(entity.getMatchName()).add(entity);
+        recognition.addEntity(entity);
         return entity.getMatchName();
     }
 

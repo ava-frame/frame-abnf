@@ -37,14 +37,15 @@ public class FuzzerContext implements InitializingBean {
      * @param ruleName
      * @param words
      * @param channel
-     * @param entityList
+     * @param entities
      * @return
      */
-    public Recognition match(String ruleName, String words, String channel, List<Entity> entityList) {
-        return match(ruleName,words,getNoAddAbnfFuzzer(channel),entityList);
+    public Recognition match(String ruleName, String words, String channel, Map<String, List<Entity>> entities) {
+        return match(ruleName, words, getNoAddAbnfFuzzer(channel), entities);
     }
-    private Recognition match(String ruleName, String words, AbnfFuzzer f, List<Entity> entityList) {
-        Recognition recognition = new Recognition(words, entityList);
+
+    private Recognition match(String ruleName, String words, AbnfFuzzer f, Map<String, List<Entity>> entities) {
+        Recognition recognition = new Recognition(words, entities);
         recognition.setFirstRule(ruleName);
         try {
             boolean match = f.match(ruleName, recognition);
@@ -60,29 +61,28 @@ public class FuzzerContext implements InitializingBean {
      *
      * @param words
      * @param channel
-     * @param entityList
+     * @param entities
      * @param rules
      * @return
      */
-    public List<Recognition> match(String words, String channel, List<Entity> entityList, String... rules) {
+    public List<Recognition> match(String words, String channel, Map<String, List<Entity>> entities, String... rules) {
         List<Recognition> recognitions = new ArrayList<>();
         int maxMatchCount = 0;
         for (String rule : rules) {
-            Recognition recognition = match(rule, words, getNoAddAbnfFuzzer(channel), entityList);
+            Recognition recognition = match(rule, words, getNoAddAbnfFuzzer(channel), entities);
             maxMatchCount = compare(recognition, recognitions, maxMatchCount);
         }
         return recognitions;
     }
 
     private int compare(Recognition recognition, List<Recognition> recognitions, int maxMatchCount) {
-        if (recognition.isMatch()) {
-            if (maxMatchCount == 0 || recognition.getIndex() == maxMatchCount) {
-                maxMatchCount = recognition.getIndex();
-                recognitions.add(recognition);
-            } else if (recognition.getIndex() > maxMatchCount) {
-                recognitions.clear();
-                recognitions.add(recognition);
-            }
+
+        if (recognition.getIndex() == maxMatchCount) {
+            recognitions.add(recognition);
+        } else if (recognition.getIndex() > maxMatchCount) {
+            recognitions.clear();
+            maxMatchCount = recognition.getIndex();
+            recognitions.add(recognition);
         }
         return maxMatchCount;
     }
@@ -92,16 +92,16 @@ public class FuzzerContext implements InitializingBean {
      *
      * @param words
      * @param channel
-     * @param entityList
+     * @param entities
      * @return
      */
-    public List<Recognition> match(String words, String channel, List<Entity> entityList) {
+    public List<Recognition> match(String words, String channel, Map<String, List<Entity>> entities) {
         List<Recognition> recognitions = new ArrayList<>();
         int maxMatchCount = 0;
-        AbnfFuzzer f=getNoAddAbnfFuzzer(channel);
+        AbnfFuzzer f = getNoAddAbnfFuzzer(channel);
         for (Rule rule : f.getRules()) {
             if (rule.getRuleName().startsWith("rule_")) {
-                Recognition recognition = match(rule.getRuleName(), words, f, entityList);
+                Recognition recognition = match(rule.getRuleName(), words, f, entities);
                 maxMatchCount = compare(recognition, recognitions, maxMatchCount);
             }
         }

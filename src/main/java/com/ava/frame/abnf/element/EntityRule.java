@@ -29,8 +29,8 @@ public class EntityRule extends Rule {
         List<Entity> list = f.matchEntity(recognition,label);
         if (list == null||list.isEmpty()) return false;
         String matchName=list.get(0).getMatchName();
-        recognition.putEntity(matchName,list);
-        recognition.addIndex(list.get(0).getMatchName().length());
+        recognition.addEntity(list);
+        recognition.addIndex(matchName.length());
         return true;
     }
 }

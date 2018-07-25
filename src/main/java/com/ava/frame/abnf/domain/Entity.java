@@ -1,7 +1,9 @@
 package com.ava.frame.abnf.domain;
 
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by redred on 2017/9/7.
@@ -16,6 +18,13 @@ public class Entity implements Cloneable {
     private int level;
     //  实体别名
     private List<String> formatNames;
+    private Map<String,Object> params=new HashMap<>();
+    public void addParam(String key,Object value){
+        params.put(key,value);
+    }
+    public Object getParam(String key){
+        return params.get(key);
+    }
     //    匹配名
     private String matchName;
 
@@ -78,5 +87,13 @@ public class Entity implements Cloneable {
 
     public void setLevel(int level) {
         this.level = level;
+    }
+
+    public Map<String, Object> getParams() {
+        return params;
+    }
+
+    public void setParams(Map<String, Object> params) {
+        this.params = params;
     }
 }

@@ -50,13 +50,20 @@ public class CommonVarRuleService extends AbsVarRuleService {
      * @return 字数最大匹配
      */
     private List<Entity> matchEntity(Recognition recognition, Set<String> set, String label) {
-        List<Entity> list = recognition.getEntitiesTemp();
+//       匹配某个label
+        List<Entity> list = recognition.getEntitiesTemp().get(label);
+        if ("all".equalsIgnoreCase(label)) {
+//            全匹配
+            list = new ArrayList<>();
+            for (List<Entity> one : recognition.getEntitiesTemp().values()) {
+                list.addAll(one);
+            }
+        }
         if (CollectionUtils.isEmpty(list)) return null;
         List<Entity> result = new ArrayList<>();
 //        最大字数
         String matchMaxParam = null;
         for (Entity one : list) {
-            if (labelExtends(label, one.getLabel())) continue;
             Entity matchMaxOne = null;
             for (String anotherName : one.getFormatNames()) {
                 if (set.contains(anotherName) && (matchMaxParam == null || anotherName.length() >= matchMaxParam.length())) {

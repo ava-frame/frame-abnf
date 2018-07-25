@@ -1,7 +1,12 @@
 package com.ava.frame.abnf.element.basic;
 
+import com.ava.frame.abnf.domain.Entity;
 import com.ava.frame.abnf.element.Recognition;
 import org.springframework.util.StringUtils;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Created by ava on 2017/6/7.
