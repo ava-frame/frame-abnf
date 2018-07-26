@@ -227,9 +227,13 @@ public class AbnfFuzzer {
      * @param recognition
      * @return
      */
-    public boolean match(String ruleName, Recognition recognition) {
-        ElementNode node = new ElementNode(getRule(ruleName), recognition.getIndex());
-        return node.match(this, recognition);
+    public ElementNode match(String ruleName, Recognition recognition) {
+        ElementNode node = new ElementNode(getRule(ruleName), recognition.getParam(), recognition.getEntitiesTemp());
+        recognition.setMatch(node.match(this)&& recognition.onlyUseless(node.lastWords()));
+        recognition.setEntities(node.getEntities());
+        recognition.setRules(node.getRules());
+        recognition.setIndex(node.getMatchWords().length());
+        return node;
     }
 
     /**
@@ -279,7 +283,7 @@ public class AbnfFuzzer {
         } else if (ruleName.contains("en_")) {
             synchronized (this) {
                 if (!entityRules.containsKey(ruleName))
-                    entityRules.put(ruleName, new EntityRule(ruleName.replaceFirst("en_","")));
+                    entityRules.put(ruleName, new EntityRule(ruleName.replaceFirst("en_", "")));
             }
             return entityRules.get(ruleName);
         }
@@ -315,139 +319,27 @@ public class AbnfFuzzer {
         random = r;
     }
 
-
-    public Entity matchVarRuleType(Recognition recognition, String labelType) {
-        List<Entity> list = matchEntity(recognition, labelType == null ? null : labelType);
-        if (list == null || list.isEmpty()) return null;
-        //return list.get(0);
-        Entity entityReturn = list.get(0);
-        return entityReturn;
-    }
-
-    public List<Entity> matchEntity(Recognition recognition, String labelType) {
-        return varRuleService.match(recognition, labelType);
+    public List<Entity> matchEntity(Map<String, List<Entity>> temp, String param, String labelType) {
+        return varRuleService.match(temp, param, labelType);
     }
 
     /**
      * 实体规则前 有部分* 适用于 正则表达式
      *
-     * @param recognition
      * @param labelType
      * @return
      */
-    public List<Entity> matchRegexEntity4AllParam(Recognition recognition, String labelType) {
-        return varRuleService.matchRegexEntity4AllParam(recognition, labelType);
+    public List<Entity> matchRegexEntity4AllParam(ElementNode node, String labelType) {
+        return varRuleService.matchRegexEntity4AllParam(node.getEntitiesTemp(), node.lastWords(), labelType);
     }
 
-
-    //    正则匹配 参数过滤
-    private Pattern pattern = Pattern.compile("(?<=\\{\\{)(.+?)(?=\\}\\})");
-
-    /**
-     * 正则匹配
-     *
-     * @param regex
-     * @param recognition
-     * @return
-     */
-    public boolean matchRegex(String regex, Recognition recognition) {
-//        剩余字符串
-//        if (regex.equals("(?<=(搜索一下|搜索下|搜索|一下|下))(.+?)")) {
-//            LogUtil.printErr(regex);
-//        }
-        String str = recognition.lastallParam();
-//        正则表达式参数替换
-        Matcher matcher = pattern.matcher(regex);
-        while (matcher.find()) {
-            String newRegex = matcher.group();
-//            同义词
-            String matchName = synWordMap.get(newRegex);
-            if (StringUtils.isEmpty(matchName)) {
-//                实体label
-                matchName = matchRegexEntity(recognition, newRegex);
-                if (StringUtils.isEmpty(matchName)) {
-//                    文法规则名
-                    matchName = matchAbnf(recognition, newRegex);
-                }
-            }
-            if (StringUtils.isEmpty(matchName)) return false;
-            matchName = matchName.replace("+", "\\\\+");
-            regex = regex.replaceAll("\\{\\{" + newRegex + "\\}\\}", "(" + matchName + ")");
-        }
-
-//        替换后字符串 前?@?后
-        String newStr = str.replaceFirst(regex, "?@?");
-        if (newStr.equals(str)) return false;
-//      前 匹配 后
-        int start = newStr.indexOf("?@?");
-        String post = newStr.substring(start + 3, newStr.length());
-        int step = str.length() - post.length();
-//      未匹配
-        if (step == 0) return false;
-//        String matchStr = str.substring(start, step);
-//        recognition.getEffectWords().append(matchStr);
-        recognition.addIndex(step);
-        return true;
-    }
-
-    /**
-     * 正则中的实体替换
-     *
-     * @param recognition
-     * @param newRegex
-     * @return
-     */
-    private String matchRegexEntity(Recognition recognition, String newRegex) {
-        List<Entity> list = matchRegexEntity4AllParam(recognition, newRegex);
-        if (CollectionUtils.isEmpty(list)) return null;
-//        多个匹配，返回最近的一个
-        Entity entity = list.get(0);
-        if (list.size() > 1) {
-            String param = recognition.lastallParam();
-            int indexMin = param.indexOf(entity.getMatchName());
-            for (Entity one : list) {
-                if (one.getMatchName() == null) continue;
-                String matchName = one.getMatchName();
-                int index = param.indexOf(matchName);
-                if (index < indexMin) {
-                    indexMin = index;
-                    entity = one;
-                }
-            }
-        }
-        recognition.addEntity(entity);
-        return entity.getMatchName();
-    }
-
-    /**
-     * 正则中的规则匹配
-     *
-     * @param recognition
-     * @param newRegex
-     * @return
-     */
-    private String matchAbnf(Recognition recognition, String newRegex) {
-        try {
-            String str = recognition.lastallParam();
-//        if (newRegex.equals("mid_TIME_days [@^是@] (mid_TIME_day /")){
-//            LogUtil.printErr(newRegex);
-//        }
-            for (int i = 0; i < str.length(); i++) {
-                String param = str.substring(i, str.length());
-                Recognition r = new Recognition(param, recognition.getEntitiesTemp());
-                if (this.match(newRegex, r)) {
-                    recognition.addRecognitionNoIndex(r);
-                    return recognition.getRules().get(newRegex);
-                }
-            }
-        } catch (Exception e) {
-//            entity label no such rule
-        }
-        return null;
-    }
 
     public void clearRules() {
         ruleList.clear();
+    }
+
+    public Map<String, String> getSynWordMap() {
+        return synWordMap;
     }
 
     public void setVarRuleService(AbsVarRuleService varRuleService) {

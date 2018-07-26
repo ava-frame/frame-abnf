@@ -75,17 +75,14 @@ class Repetition extends Element {
     }
 
     @Override
-    public boolean match(final AbnfFuzzer f, Recognition recognition) {
-        StringBuilder words=new StringBuilder();
+    public boolean match(final AbnfFuzzer f, ElementNode fatherNode) {
         int matchCount=0;
         for (int i = 0; i < atMost; i++) {
-            if (! super.match(f, recognition)) {
+            if (! super.match(f, fatherNode)) {
                 break;
             };
             matchCount++;
-            words.append(recognition.getLastParamMatch());
         }
-        recognition.setLastParamMatch(words.toString());
         return matchCount>=atLeast;
     }
 

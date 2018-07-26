@@ -3,6 +3,7 @@ package com.ava.frame.abnf.element;
 
 import com.ava.frame.abnf.domain.Entity;
 import com.ava.frame.abnf.element.basic.AbnfFuzzer;
+import com.ava.frame.abnf.element.basic.ElementNode;
 import com.ava.frame.abnf.element.basic.Rule;
 
 import java.util.List;
@@ -18,19 +19,20 @@ public class EntityRule extends Rule {
 
     public EntityRule(String label) {
         this.label = label;
+        this.setRuleName(label);
     }
 
     public EntityRule() {
     }
 
     @Override
-    public boolean match(AbnfFuzzer f, Recognition recognition) {
+    public boolean match(AbnfFuzzer f, ElementNode fatherNode) {
 //        不同label可能同名，所以得都返回
-        List<Entity> list = f.matchEntity(recognition,label);
+        List<Entity> list = f.matchEntity(fatherNode.getEntitiesTemp(),fatherNode.lastWords(),label);
         if (list == null||list.isEmpty()) return false;
         String matchName=list.get(0).getMatchName();
-        recognition.addEntity(list);
-        recognition.addIndex(matchName.length());
+        fatherNode.addEntity(list);
+        fatherNode.addMatchWords(matchName);
         return true;
     }
 }

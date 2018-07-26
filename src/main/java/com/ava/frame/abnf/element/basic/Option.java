@@ -28,11 +28,14 @@ class Option extends Element {
     private static final byte[] EMPTY = new byte[0];
 
     @Override
-    public boolean match(final AbnfFuzzer f, Recognition recognition) {
+    public boolean match(final AbnfFuzzer f, ElementNode fatherNode) {
         if (elements.size() != 1) {
             throw new IllegalStateException("option should contain 1 element");
         }
-        boolean match= new ElementNode(elements.get(0),recognition.getIndex()).match(f, recognition);
+        ElementNode node = new ElementNode(elements.get(0), fatherNode.lastWords(), fatherNode.getEntitiesTemp());
+        if (node.match(f)) {
+            fatherNode.addSunNode(node);
+        }
         return true;
     }
 

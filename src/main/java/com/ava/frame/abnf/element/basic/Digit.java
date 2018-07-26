@@ -14,7 +14,7 @@ import java.util.Set;
  * @author Nick Radov
  */
 final class Digit extends Rule {
-    private final static List<String> han = CollectionUtils.arrayToList(new String[]{"零", "一", "二","两","俩","三", "四", "五", "六", "七", "八", "九", "十","百","千","万","亿","兆"
+    private final static List<String> han = CollectionUtils.arrayToList(new String[]{"零", "一", "二", "两", "俩", "三", "四", "五", "六", "七", "八", "九", "十", "百", "千", "万", "亿", "兆"
     });
 
 
@@ -28,13 +28,13 @@ final class Digit extends Rule {
     }
 
     @Override
-    public boolean match(AbnfFuzzer f, Recognition recognition){
-            String str = recognition.subParamFromIndex(1);
-            if (StringUtils.isBlank(str)) return false;
-            if (han.contains(str) || StringUtils.isNumber(str)) {
-                recognition.addIndex(1);
-                return true;
-            }
+    public boolean match(AbnfFuzzer f, ElementNode fatherNode) {
+        String str = fatherNode.subParamFromIndex(1);
+        if (StringUtils.isBlank(str)) return false;
+        if (han.contains(str) || StringUtils.isNumber(str)) {
+            fatherNode.addMatchWords(str);
+            return true;
+        }
         return false;
     }
 }

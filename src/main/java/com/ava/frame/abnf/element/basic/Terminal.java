@@ -67,24 +67,34 @@ class Terminal extends Element {
         }
     }
 
-    Pattern patternRegrexParam = Pattern.compile("(?<=\\{\\{)(.+?)(?=\\}\\})");
+    private Regex regex = new Regex();
 
     @Override
-    public boolean match(final AbnfFuzzer f, Recognition recognition) {
+    public boolean match(final AbnfFuzzer f, ElementNode fatherNode) {
         switch (type) {
             case Characters:
                 return false;
             case Regrex:
-                return f.matchRegex(value, recognition);
+                ElementNode sunNode = new ElementNode(regex, fatherNode.lastWords(), fatherNode.getEntitiesTemp(), value);
+                if (sunNode.match(f)) {
+                    fatherNode.addSunNode(sunNode);
+                    return true;
+                }
+                return false;
             case LiteralText:
-                if (value.equalsIgnoreCase(recognition.subParamFromIndex(value.length()))) {
-                    recognition.addIndex(value.length());
+                if (value.equalsIgnoreCase(fatherNode.subParamFromIndex(value.length()))) {
+                    fatherNode.setMatchWords(value);
+                    fatherNode.setMatch(true);
                     return true;
                 }
                 return false;
             case RuleName:
-//                return new ElementNode(f.getRule(value),recognition.getIndex()).match(f, recognition);
-                return f.match(value, recognition);
+                ElementNode sunNode1 = new ElementNode(f.getRule(value), fatherNode.lastWords(), fatherNode.getEntitiesTemp());
+                if (sunNode1.match(f)) {
+                    fatherNode.addSunNode(sunNode1);
+                    return true;
+                }
+                return false;
             default:
                 throw new IllegalStateException();
         }

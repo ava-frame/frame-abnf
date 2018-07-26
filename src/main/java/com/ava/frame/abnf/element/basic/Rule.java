@@ -2,13 +2,6 @@ package com.ava.frame.abnf.element.basic;
 
 
 import com.ava.frame.abnf.antlr4.AbnfParser;
-import com.ava.frame.abnf.domain.Entity;
-import com.ava.frame.abnf.element.Recognition;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  * Rule definition.
@@ -51,17 +44,14 @@ public class Rule extends Element {
     }
 
     @Override
-    public boolean match(final AbnfFuzzer f, Recognition recognition) {
+    public boolean match(final AbnfFuzzer f,ElementNode fatherNode) {
         boolean match = true;
-        StringBuilder words = new StringBuilder();
         for (Element e : elements) {
-            ElementNode node = new ElementNode(e, recognition.getIndex());
-            match = match && node.match(f, recognition);
+            ElementNode sunNode = new ElementNode(e, fatherNode.lastWords(), fatherNode.getEntitiesTemp());
+            match = match && sunNode.match(f);
             if (!match) break;
-            words.append(node.getWords());
+            fatherNode.addSunNode(sunNode);
         }
-//
-        recognition.setLastParamMatch(words.toString());
         return match;
     }
 

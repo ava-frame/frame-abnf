@@ -26,8 +26,8 @@ public class CommonVarRuleService extends AbsVarRuleService {
 
 
     @Override
-    public List<Entity> match(Recognition recognition, String labelType) {
-        return matchEntity(recognition, retainSet(recognition.lastallParam()), labelType);
+    public List<Entity> match(Map<String, List<Entity>> temp, String param, String labelType) {
+        return matchEntity(temp, retainSet(param), labelType);
     }
 
 
@@ -45,17 +45,17 @@ public class CommonVarRuleService extends AbsVarRuleService {
      * 匹配实体
      * label匹配或者null全匹配
      *
-     * @param recognition
+     * @param temp
      * @param label
      * @return 字数最大匹配
      */
-    private List<Entity> matchEntity(Recognition recognition, Set<String> set, String label) {
+    private List<Entity> matchEntity(Map<String, List<Entity>> temp, Set<String> set, String label) {
 //       匹配某个label
-        List<Entity> list = recognition.getEntitiesTemp().get(label);
+        List<Entity> list = temp.get(label);
         if ("all".equalsIgnoreCase(label)) {
 //            全匹配
             list = new ArrayList<>();
-            for (List<Entity> one : recognition.getEntitiesTemp().values()) {
+            for (List<Entity> one : temp.values()) {
                 list.addAll(one);
             }
         }
@@ -103,12 +103,11 @@ public class CommonVarRuleService extends AbsVarRuleService {
     /**
      * 匹配之后的任意字符
      *
-     * @param recognition
      * @param label
      * @return
      */
-    public List<Entity> matchRegexEntity4AllParam(Recognition recognition, String label) {
-        return matchEntity(recognition, retainSet4LastAllParam(recognition.lastallParam()), label);
+    public List<Entity> matchRegexEntity4AllParam(Map<String, List<Entity>> temp, String param, String label) {
+        return matchEntity(temp, retainSet4LastAllParam(param), label);
     }
 
     public Set<String> retainSet4LastAllParam(String lastParam) {

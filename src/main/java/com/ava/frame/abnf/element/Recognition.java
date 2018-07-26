@@ -22,7 +22,7 @@ public class Recognition implements Cloneable, Serializable {
     //    最终结果
     private boolean match = false;
     //    分解词的位置
-    private AtomicInteger index = new AtomicInteger(0);
+    private int index = 0;
     //    正在匹配的字词
     private transient String lastParamMatch = "";
     //    原始根规则,最终匹配的规则名
@@ -74,24 +74,12 @@ public class Recognition implements Cloneable, Serializable {
         this.firstRule = firstRule;
     }
 
-    public void resetIndex(int offset) {
-        index.set(offset);
-    }
-
-    public int getIndex() {
-        return index.get();
-    }
-
 
     public void putRule(String ruleName, String value) {
         if (StringUtils.isBlank(ruleName)) return;
         rules.put(ruleName, value);
     }
 
-
-    public void setIndex(AtomicInteger index) {
-        this.index = index;
-    }
 
     public void setRules(Map<String, String> rules) {
         this.rules = rules;
@@ -133,32 +121,17 @@ public class Recognition implements Cloneable, Serializable {
         this.lastParamMatch = lastParamMatch;
     }
 
-    public String subParamFromIndex(int length) {
-        try {
-            if (index.get() + length > param.length()) return null;
-            return param.substring(index.get(), length + index.get());
-        } catch (Exception e) {
-            return null;
-        }
-
+    public int getIndex() {
+        return index;
     }
 
-    public void addIndex(int length) {
-        try {
-            lastParamMatch = param.substring(index.get(), index.get() + length);
-            index.addAndGet(length);
-        } catch (Exception e) {
-
-        }
+    public void setIndex(int index) {
+        this.index = index;
     }
 
     public Recognition(String param, Map<String, List<Entity>> entitiesTemp) {
         this.param = param;
         this.entitiesTemp = entitiesTemp;
-    }
-
-    public String lastallParam() {
-        return subParamFromIndex(this.param.length() - this.getIndex());
     }
 
     public String getParam() {
@@ -168,46 +141,17 @@ public class Recognition implements Cloneable, Serializable {
     public void setParam(String param) {
         this.param = param;
     }
-
-
-    public void addRecognitionNoIndex(Recognition matchRecog) {
-        rules.putAll(matchRecog.getRules());
-        entities.addAll(matchRecog.getEntities());
-    }
-
-    public List<List<Entity>> getEntities() {
-        return entities;
-    }
-
-    public int retainLastLen() {
-        return param.length() - index.get();
-    }
-
-    /**
-     * 添加某个label的实体
-     *
-     * @param list
-     */
-    public void addEntity(List<Entity> list) {
-        entities.add(list);
-    }
-
-    /**
-     * 添加某个label的实体
-     *
-     * @param one
-     */
-    public void addEntity(Entity one) {
-        List<Entity> list=new ArrayList<>();
-        list.add(one);
-        entities.add(list);
-    }
     public String containSubRule(String sub){
         for (String rule:this.rules.keySet()){
             if (rule.contains(sub))return rule;
         }
         return null;
     }
+
+    public List<List<Entity>> getEntities() {
+        return entities;
+    }
+
 
     public void setEntities(List<List<Entity>> entities) {
         this.entities = entities;

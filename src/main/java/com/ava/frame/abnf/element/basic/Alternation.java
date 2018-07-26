@@ -47,7 +47,7 @@ class Alternation extends Element {
     }
 
     @Override
-    public boolean match(final AbnfFuzzer f, Recognition recognition) {
+    public boolean match(final AbnfFuzzer f, ElementNode fatherNode) {
         if (elements.isEmpty()) {
             throw new IllegalStateException();
         }
@@ -58,9 +58,12 @@ class Alternation extends Element {
         }
         boolean match = false;
         for (Element e : filtered) {
-            ElementNode node=new ElementNode(e,recognition.getIndex());
-            match =node.match(f, recognition);
-            if(match)break;
+            ElementNode node=new ElementNode(e,fatherNode.lastWords(),fatherNode.getEntitiesTemp());
+            match =node.match(f);
+            if(match){
+                fatherNode.addSunNode(node);
+                break;
+            }
         }
         return match;
     }

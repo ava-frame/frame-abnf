@@ -1,6 +1,6 @@
 package com.ava.frame.abnf.element.basic;
+
 import com.ava.frame.abnf.antlr4.AbnfParser.*;
-import com.ava.frame.abnf.element.Recognition;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
@@ -23,7 +23,7 @@ public class Element {
     Element(final ParseTree elements) {
         for (int i = 0; i < elements.getChildCount(); i++) {
             final ParseTree child = elements.getChild(i);
-             if (child instanceof AlternationContext) {
+            if (child instanceof AlternationContext) {
                 this.elements.add(new Alternation((AlternationContext) child));
             } else if (child instanceof ConcatenationContext) {
                 this.elements
@@ -47,7 +47,7 @@ public class Element {
                 // we don't want to store nodes for separators
                 if (!(value.startsWith("[") || value.startsWith("]")
                         || value.startsWith("(") || value.startsWith(")")
-                        || value.startsWith("/")||value.startsWith(",")
+                        || value.startsWith("/") || value.startsWith(",")
                         || value.startsWith("*"))) {
                     this.elements.add(new Terminal(tn));
                 }
@@ -86,16 +86,14 @@ public class Element {
         return generated;
     }
 
-    public boolean match(final AbnfFuzzer f, Recognition recognition) {
+    public boolean match(final AbnfFuzzer f, ElementNode fatherNode) {
         boolean match = true;
-        StringBuilder words = new StringBuilder();
         for (Element e : elements) {
-            ElementNode node = new ElementNode(e, recognition.getIndex());
-            match = match && node.match(f, recognition);
+            ElementNode sunNode = new ElementNode(e, fatherNode.lastWords(), fatherNode.getEntitiesTemp());
+            match = match && sunNode.match(f);
             if (!match) break;
-            words.append(node.getWords());
+            fatherNode.addSunNode(sunNode);
         }
-        recognition.setLastParamMatch(words.toString());
         return match;
     }
 
