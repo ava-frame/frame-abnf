@@ -25,7 +25,6 @@ public class Regex extends Element {
         ElementNode node = null;
         while (matcher.find()) {
             String newRegex = matcher.group();
-
 //            同义词
             String matchName = f.getSynWordMap().get(newRegex);
             if (StringUtils.isEmpty(matchName)) {

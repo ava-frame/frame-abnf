@@ -16,7 +16,9 @@ import java.util.Map;
 public class ElementNode {
     private Element element;
     private boolean match=false;
+//    剩余句子
     private String words;
+//    剩余句子中 已匹配的 句子
     private String matchWords = "";
     private Map<String, String> rules = new HashMap<>();
     private transient Map<String, List<Entity>> entitiesTemp = new HashMap<>();
@@ -77,6 +79,11 @@ public class ElementNode {
         return words;
     }
 
+    /**
+     * 剩余句子words中截取前length个字
+     * @param length
+     * @return
+     */
     public String subParamFromIndex(int length) {
         try {
             return lastWords().substring(0, length);
@@ -86,6 +93,11 @@ public class ElementNode {
 
     }
 
+    /**
+     * 匹配节点
+     * @param fuzzer
+     * @return
+     */
     public boolean match(AbnfFuzzer fuzzer) {
         match = element.match(fuzzer, this);
         if (match && element instanceof Rule) {
@@ -102,9 +114,7 @@ public class ElementNode {
         return rules;
     }
 
-    public void addMatchWords(String matchWords) {
-        this.matchWords += matchWords;
-    }
+
 
     public void setRules(Map<String, String> rules) {
         this.rules = rules;
@@ -132,12 +142,26 @@ public class ElementNode {
                 element +
                 '}';
     }
-
+    /**
+     * 对于没有rule和entity的，匹配成功只添加matchWords
+     * @param matchWords
+     */
+    public void addMatchWords(String matchWords) {
+        this.matchWords += matchWords;
+    }
+    /**
+     * 子节点匹配成功，添加matchWords,rules,entities
+     * @param sunNode
+     */
     public void addSunNode(ElementNode sunNode) {
         this.matchWords += sunNode.getMatchWords();
         this.rules.putAll(sunNode.getRules());
         this.entities.addAll(sunNode.getEntities());
     }
+    /**
+     * 子节点匹配成功，添加 rules,entities
+     * @param sunNode
+     */
     public void addRuleAndEntity(ElementNode sunNode) {
         this.rules.putAll(sunNode.getRules());
         this.entities.addAll(sunNode.getEntities());

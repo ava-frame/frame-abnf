@@ -10,8 +10,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.Resource;
 import java.io.File;
 import java.io.FileInputStream;
 import java.util.ArrayList;
@@ -29,7 +31,70 @@ public class FuzzerContext implements InitializingBean {
     private static Logger log = LoggerFactory.getLogger(FuzzerContext.class);
     //    不同渠道有不同的规则
     private Map<String, AbnfFuzzer> fuzzerMap = new HashMap<>();
+    @Resource(name = "commonVarRuleService")
     private AbsVarRuleService varRuleService;
+
+    /**
+     * 匹配全部规则
+     *
+     * @param words
+     * @param channel
+     * @param entities
+     * @return
+     */
+    public List<Recognition> match(String words, String channel, Map<String, List<Entity>> entities) {
+        List<Recognition> recognitions = new ArrayList<>();
+        int maxMatchCount = 1;
+        AbnfFuzzer f = getNoAddAbnfFuzzer(channel);
+        for (Rule rule : f.getRules()) {
+            if (rule.getRuleName().startsWith("rule_")) {
+                Recognition recognition = match(rule.getRuleName(), words, f, entities);
+                maxMatchCount = compare(recognition, recognitions, maxMatchCount);
+            }
+        }
+        return recognitions;
+    }
+
+    /**
+     * 匹配某个领域：ruleName中包含某个字符串rule_domain
+     *
+     * @param words
+     * @param channel
+     * @param entities
+     * @param domain
+     * @return
+     */
+    public List<Recognition> match(String words, String channel, Map<String, List<Entity>> entities, String domain) {
+        List<Recognition> recognitions = new ArrayList<>();
+        int maxMatchCount = 1;
+        AbnfFuzzer f = getNoAddAbnfFuzzer(channel);
+        for (Rule rule : f.getRules()) {
+            if (rule.getRuleName().startsWith("rule_") && rule.getRuleName().contains("_" + domain)) {
+                Recognition recognition = match(rule.getRuleName(), words, f, entities);
+                maxMatchCount = compare(recognition, recognitions, maxMatchCount);
+            }
+        }
+        return recognitions;
+    }
+
+    /**
+     * 匹配多条规则
+     *
+     * @param words
+     * @param channel
+     * @param entities
+     * @param rules
+     * @return
+     */
+    public List<Recognition> match(String words, String channel, Map<String, List<Entity>> entities, String... rules) {
+        List<Recognition> recognitions = new ArrayList<>();
+        int maxMatchCount = 1;
+        for (String rule : rules) {
+            Recognition recognition = match(rule, words, getNoAddAbnfFuzzer(channel), entities);
+            maxMatchCount = compare(recognition, recognitions, maxMatchCount);
+        }
+        return recognitions;
+    }
 
     /**
      * 匹配规则 :一条
@@ -55,24 +120,6 @@ public class FuzzerContext implements InitializingBean {
         return recognition;
     }
 
-    /**
-     * 匹配多条规则
-     *
-     * @param words
-     * @param channel
-     * @param entities
-     * @param rules
-     * @return
-     */
-    public List<Recognition> match(String words, String channel, Map<String, List<Entity>> entities, String... rules) {
-        List<Recognition> recognitions = new ArrayList<>();
-        int maxMatchCount = 1;
-        for (String rule : rules) {
-            Recognition recognition = match(rule, words, getNoAddAbnfFuzzer(channel), entities);
-            maxMatchCount = compare(recognition, recognitions, maxMatchCount);
-        }
-        return recognitions;
-    }
 
     private int compare(Recognition recognition, List<Recognition> recognitions, int maxMatchCount) {
         if (recognition.getIndex() == maxMatchCount) {
@@ -85,33 +132,13 @@ public class FuzzerContext implements InitializingBean {
         return maxMatchCount;
     }
 
-    /**
-     * 匹配全部规则
-     *
-     * @param words
-     * @param channel
-     * @param entities
-     * @return
-     */
-    public List<Recognition> match(String words, String channel, Map<String, List<Entity>> entities) {
-        List<Recognition> recognitions = new ArrayList<>();
-        int maxMatchCount = 1;
-        AbnfFuzzer f = getNoAddAbnfFuzzer(channel);
-        for (Rule rule : f.getRules()) {
-            if (rule.getRuleName().startsWith("rule_")) {
-                Recognition recognition = match(rule.getRuleName(), words, f, entities);
-                maxMatchCount = compare(recognition, recognitions, maxMatchCount);
-            }
-        }
-        return recognitions;
-    }
 
     /**
      * 解释器初始化
      */
     private void init() {
         try {
-            setVarRuleService(SpringApplicationContext.getBean("commonVarRuleService"));
+            setVarRuleService(varRuleService);
             String abnfPath = this.getClass().getClassLoader().getResource("abnf").getPath();
             File abnfs = new File(abnfPath);
             if (abnfs.exists() && abnfs.isDirectory()) {
